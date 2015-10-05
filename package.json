@@ -1,0 +1,31 @@
+{
+  "name": "webgme-power",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node ./node_modules/mocha/bin/mocha --recursive test"
+  },
+  "version": "1.0.0",
+  "dependencies": {
+    "webgme": "latest"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.5",
+    "rimraf": "^2.4.0",
+    "chai": "^3.0.0"
+  },
+  "description": "Domain specific language for power system",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hasans3/webgme-power.git"
+  },
+  "author": "saqib",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hasans3/webgme-power/issues"
+  },
+  "homepage": "https://github.com/hasans3/webgme-power#readme"
+}
