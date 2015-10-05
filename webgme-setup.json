@@ -1,4 +1,17 @@
 {
-  "components": {},
-  "dependencies": {}
+  "components": {
+    "plugins": {
+      "OpenDSS_Generator": {
+        "src": "src/plugins/OpenDSS_Generator",
+        "test": "test/plugins/OpenDSS_Generator"
+      }
+    },
+    "seeds": {},
+    "visualizers": {}
+  },
+  "dependencies": {
+    "plugins": {},
+    "seeds": {},
+    "visualizers": {}
+  }
 }

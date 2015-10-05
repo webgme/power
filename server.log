@@ -1,0 +1,15 @@
+2015-10-05T19:26:13.484Z - info: [gme:server:standalone] Valid addresses of gme web server:   http://127.0.0.1:8888  http://10.66.70.53:8888  http://10.2.243.96:8888
+2015-10-05T19:26:14.054Z - warn: [gme:server:auth:gmeauth] User "guest" was not found. We will attempt to create it automatically.
+2015-10-05T19:26:14.469Z - info: [gme:server:worker:simpleworker:pid_1741] initialized worker
+2015-10-05T19:26:15.340Z - warn: [gme:server:auth:gmeauth] Guest access can be disabled by setting gmeConfig.authentication.allowGuests = false
+2015-10-05T19:26:15.344Z - info: [gme:server:auth:gmeauth] Guest account:  _id=guest, email=guest, canCreate=true, , type=User, orgs=[], siteAdmin=null
+2015-10-05T19:27:49.133Z - info: [gme:server:worker:simpleworker:pid_1741:WorkerFunctions] seedProject
+2015-10-05T19:27:49.412Z - info: [gme:server:worker:simpleworker:pid_1741:WorkerFunctions] seeding [EmptyProject] to [guest+power] completed
+2015-10-05T19:27:50.122Z - info: [gme:server:worker:simpleworker:pid_1747] initialized worker
+2015-10-05T19:27:50.134Z - warn: [gme:server:standalone:serverworkermanager] worker 1747 has exited abnormally with code 0
+2015-10-05T19:35:09.413Z - info: [gme:server:standalone:mongo] tried to insert existing hash - the two objects were equal #170bba3ffb3f78212964f6e5db4031dd75eaa6e3
+2015-10-05T19:44:39.143Z - info: [gme:server:standalone:mongo] tried to insert existing hash - the two objects were equal #7adb5fbc49591ceb32828f9bf9b796c9f0855991
+2015-10-05T19:44:39.150Z - info: [gme:server:standalone:mongo] tried to insert existing hash - the two objects were equal #541e3893cb53c5b856ca66a65d2d27a3487793d0
+2015-10-05T19:49:57.200Z - info: [gme:server:standalone:mongo] tried to insert existing hash - the two objects were equal #56d0a023f48602ab94c25ea3271a689649e08454
+2015-10-05T19:49:57.201Z - info: [gme:server:standalone:mongo] tried to insert existing hash - the two objects were equal #4ad84422f5dc6fac20ce1219ad87de50e8ff1549
+2015-10-05T19:49:57.208Z - info: [gme:server:standalone:mongo] tried to insert existing hash - the two objects were equal #57dbda6f0ac7d2f560487171c0ef821a7f35d1ab
