@@ -73,20 +73,20 @@ define([
 
         nodeObject = self.activeNode;
 
-        self.core.setAttribute(nodeObject, 'name', 'My new obj');
-        self.core.setRegistry(nodeObject, 'position', {x: 70, y: 70});
+        //self.core.setAttribute(nodeObject, 'name', 'My new obj');
+        //self.core.setRegistry(nodeObject, 'position', {x: 70, y: 70});
 
 
         // This will save the changes. If you don't want to save;
         // exclude self.save and call callback directly from this scope.
-        self.save('New Plugin updated model.', function (err) {
-            if (err) {
-                callback(err, self.result);
-                return;
-            }
+        //self.save('New Plugin updated model.', function (err) {
+        //    if (err) {
+        //        callback(err, self.result);
+        //        return;
+        //    }
             self.result.setSuccess(true);
             callback(null, self.result);
-        });
+        //});
 
     };
 
