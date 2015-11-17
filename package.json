@@ -6,7 +6,7 @@
   },
   "version": "1.0.0",
   "dependencies": {
-    "webgme": "latest"
+    "webgme": "https://github.com/webgme/webgme/tarball/834fe0ab0d889b64f1f2af757bb360590f3f75a5"
   },
   "devDependencies": {
     "mocha": "^2.2.5",
