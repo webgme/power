@@ -61,17 +61,141 @@ define([
         // These are all instantiated at this point.
         var self = this,
             nodeObject;
+        var output = '';
 
 
         // Using the logger.
         self.logger.debug('This is a debug message.');
         self.logger.info('This is an info message.');
         self.logger.warn('This is a warning message.');
-        self.logger.error('This is an error message.');
+        //self.logger.error('This is an error message.');
 
         // Using the coreAPI to make changes.
 
         nodeObject = self.activeNode;
+        if (self.core.getPath(self.activeNode) === ' ' || self.isMetaTypeOf(self.activeNode, self.META.PowerSystem) === false)
+        {
+            callback('ActiveNode is not a powersystem', self.result);
+            return;
+        }
+
+        self.core.loadSubTree(self.activeNode, function (err, nodeList) {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            var i,
+                nodePath,
+                nodes = {};
+            for (i = 0; i < nodeList.length; i += 1) {
+                nodePath = self.core.getPath(nodeList[i]);
+                nodes[nodePath] = nodeList[i];
+                self.logger.info(nodePath);
+            }
+            var childrenPaths = self.core.getChildrenPaths(self.activeNode);
+            for (i=0; i < childrenPaths.length; i += 1) {
+                var childNode = nodes[childrenPaths[i]];
+
+                //self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //if (self.isMetaTypeOf(childNode, self.META.Source) === true) {
+                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'phases'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'MVA'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'R1'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'X1'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'basekv'));
+                //}
+                //if (self.isMetaTypeOf(childNode, self.META.TransmissionLine) === true) {
+                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'C0'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'C1'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'R0'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'R1'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'X1'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'X0'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'Length'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'units'));
+                //}
+                //if (self.isMetaTypeOf(childNode, self.META.Load) === true) {
+                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'phases'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'Kw'));
+                //    self.logger.info(self.core.getAttribute(childNode, 'kv'));
+                //}
+                //if (self.isMetaTypeOf(childNode, self.META.Bus) === true) {
+                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //}
+
+                var j,
+                    connectionPaths, connectionNode, dstPath, dstNode;
+                connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                for (j = 0; j < connectionPaths.length; j += 1) {
+                    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                    connectionNode = nodes[connectionPaths[j]];
+                    dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                    dstNode = nodes[dstPath];
+                    self.logger.info(self.core.getAttribute(dstNode, 'name'));
+                    //output += self.logger.info(self.core.getAttribute(childNode, 'name'));
+                    //self.logger.info(output);
+                    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
+                                var nam = self.core.getAttribute(connectionNode, 'name');
+                                var MVA = self.core.getAttribute(connectionNode, 'MVA');
+                                var R1 = self.core.getAttribute(connectionNode, 'R1');
+                                var X1 = self.core.getAttribute(connectionNode, 'X1');
+                                var phases = self.core.getAttribute(connectionNode, 'Phases');
+                                var basekv = self.core.getAttribute(connectionNode, 'basekv');
+                                output = 'New vsource.'
+                                    //+nam +'phases='+phases +'basekv='+basekv+'MVA='+MVA+'r1='+R1+'x1='+X1;
+                                self.logger.info(output);
+                            }
+
+                }
+            }
+            //for (i = 0; i < connectionPaths.length; i += 1) {
+            //    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
+            //        var nam = self.core.getAttribute(connectionNode, 'name');
+            //        var MVA = self.core.getAttribute(connectionNode, 'MVA');
+            //        var R1 = self.core.getAttribute(connectionNode, 'R1');
+            //        var X1 = self.core.getAttribute(connectionNode, 'X1');
+            //        var phases = self.core.getAttribute(connectionNode, 'Phases');
+            //        var basekv = self.core.getAttribute(connectionNode, 'basekv');
+            //        output = nam.concat('New vsource.',nam,'phases=',phases,'basekv=',basekv,'MVA=',MVA,'r1=',R1,'x1=',X1);
+            //        self.logger.info(output);
+            //    }
+            //}
+
+
+
+
+            //var artifact = self.blobClient.createArtifact('PowerSystem');
+            //// Upload the files to server.
+            //artifact.addFile('output.txt', output, function (err) {
+            //    if (err) {
+            //        callback(err);
+            //        return
+            //    }
+            //    // Save the artifact (uploads meta data about the file(s) within in it).
+            //    artifact.save(function (err, hash) {
+            //        if (err) {
+            //            callback(err);
+            //            return
+            //        }
+            //
+            //        // Add a link to the artifact to the plugin-result.
+            //        self.result.addArtifact(hash);
+            //
+            //        self.result.setSuccess(true);
+            //        callback(null, self.result);
+            //    })
+            //});
+
+            self.result.setSuccess(true);
+            callback(null, self.result);
+        });
+
+
+
 
         //self.core.setAttribute(nodeObject, 'name', 'My new obj');
         //self.core.setRegistry(nodeObject, 'position', {x: 70, y: 70});
@@ -84,8 +208,7 @@ define([
         //        callback(err, self.result);
         //        return;
         //    }
-            self.result.setSuccess(true);
-            callback(null, self.result);
+
         //});
 
     };
