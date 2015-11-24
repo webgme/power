@@ -93,9 +93,120 @@ define([
                 nodes[nodePath] = nodeList[i];
                 self.logger.info(nodePath);
             }
+            var powersystem = {
+                source: [], lines: [], loads: []
+            };
             var childrenPaths = self.core.getChildrenPaths(self.activeNode);
+            var j,
+                connectionPaths, connectionNode,srcpath, srcNode, dstPath, dstNode;
             for (i=0; i < childrenPaths.length; i += 1) {
                 var childNode = nodes[childrenPaths[i]];
+                if (self.isMetaTypeOf(childNode, self.META.Source) === true) {
+                    var nam = self.core.getAttribute(childNode, 'name');
+                    var buses = [];
+                    connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                    for (j = 0; j < connectionPaths.length; j += 1) {
+                        //self.logger.info(self.core.getAttribute(childNode, 'name'));
+                        connectionNode = nodes[connectionPaths[j]];
+                        srcpath = self.core.getPointerPath(connectionNode, 'src');
+                        srcNode = nodes[srcpath];
+                        dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                        dstNode = nodes[dstPath];
+                        //self.logger.info(self.core.getAttribute(dstNode, 'name'));
+                        var dstname = self.core.getAttribute(dstNode, 'name');
+                        var relid = self.core.getRelid(dstNode);
+                        buses.push('bus' + 1 + '=' + dstname);
+                    }
+                    var sourcenam = self.core.getAttribute(childNode, 'name');
+                    var MVA = self.core.getAttribute(childNode, 'MVA');
+                    var r1 = self.core.getAttribute(childNode, 'R1');
+                    var x1 = self.core.getAttribute(childNode, 'X1');
+                    var phase = self.core.getAttribute(childNode, 'phases');
+                    var basekv = self.core.getAttribute(childNode, 'basekv');
+                    powersystem.source.push({
+                        name: sourcenam,
+                        MVA: MVA,
+                        R1: r1,
+                        X1: x1,
+                        phases: phase,
+                        basekv: basekv,
+                        buses: buses
+                    });
+                }
+                if (self.isMetaTypeOf(childNode, self.META.Line) === true) {
+                    var Lname = self.core.getAttribute(childNode, 'name');
+                    connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                    for (j = 0; j < connectionPaths.length; j += 1) {
+                        self.logger.info(self.core.getAttribute(childNode, 'name'));
+                        connectionNode = nodes[connectionPaths[j]];
+                        srcpath = self.core.getPointerPath(connectionNode, 'src');
+                        srcNode = nodes[srcpath];
+                        dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                        dstNode = nodes[dstPath];
+                        var dstname1 = self.core.getAttribute(dstNode, 'name');
+                        self.logger.info(dstname1);
+                    }
+                }
+                //    connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
+                //    for (j = 0; j < connectionPaths.length; j += 1) {
+                //        //    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //        connectionNode = nodes[connectionPaths[j]];
+                //        srcpath = self.core.getPointerPath(connectionNode, 'src');
+                //        srcNode = nodes[srcpath];
+                //        dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                //        dstNode = nodes[dstPath];
+                //        //self.logger.info(self.core.getAttribute(dstNode, 'name'));
+                //        var dstname2 = self.core.getAttribute(dstNode, 'name');
+                //    }
+                //    var Linename = self.core.getAttribute(childNode, 'name');
+                //    var C0 = self.core.getAttribute(srcNode, 'C0');
+                //    var C1 = self.core.getAttribute(srcNode, 'C1');
+                //    var X0 = self.core.getAttribute(srcNode, 'X0');
+                //    var Phases = self.core.getAttribute(srcNode, 'Phases');
+                //    var X1 = self.core.getAttribute(srcNode, 'X1');
+                //    var R0 = self.core.getAttribute(srcNode, 'R0');
+                //    var Length = self.core.getAttribute(srcNode, 'Length');
+                //    var R1 = self.core.getAttribute(srcNode, 'R1');
+                //    var Units = self.core.getAttribute(srcNode, 'units');
+                //    powersystem.Lines.push({
+                //        name: Linename,
+                //        C0: C0,
+                //        C1: C1,
+                //        R1: R1,
+                //        R0: R0,
+                //        X0: X0,
+                //        X1: X1,
+                //        phases: Phases,
+                //        Length: Length,
+                //        Units: units
+                //    });
+                //}
+                //if (self.isMetaTypeOf(childNode, self.META.Load) === true) {
+                //    var Ldname = self.core.getAttribute(childNode, 'name');
+                //    connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                //    for (j = 0; j < connectionPaths.length; j += 1) {
+                //        //    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //        connectionNode = nodes[connectionPaths[j]];
+                //        srcpath = self.core.getPointerPath(connectionNode, 'src');
+                //        srcNode = nodes[srcpath];
+                //        dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                //        dstNode = nodes[dstPath];
+                //        //self.logger.info(self.core.getAttribute(dstNode, 'name'));
+                //        var dstname3 = self.core.getAttribute(dstNode, 'name');
+                //    }
+                //    var Loadname = self.core.getAttribute(childNode, 'name');
+                //    var phases = self.core.getAttribute(childNode, 'phases');
+                //    var KW = self.core.getAttribute(childNode, 'Kw');
+                //    var KV = self.core.getAttribute(childNode, 'kv');
+                //    powersystem.loads.push({
+                //        name: Loadname,
+                //        KW: Kw,
+                //        KV: kv,
+                //        phases: phases
+                //    });
+                //}
+            }
+
 
                 //self.logger.info(self.core.getAttribute(childNode, 'name'));
                 //if (self.isMetaTypeOf(childNode, self.META.Source) === true) {
@@ -127,68 +238,68 @@ define([
                 //    self.logger.info(self.core.getAttribute(childNode, 'name'));
                 //}
 
-                var j,
-                    connectionPaths, connectionNode, dstPath, dstNode;
-                connectionPaths = self.core.getCollectionPaths(childNode, 'src');
-                for (j = 0; j < connectionPaths.length; j += 1) {
-                    self.logger.info(self.core.getAttribute(childNode, 'name'));
-                    connectionNode = nodes[connectionPaths[j]];
-                    dstPath = self.core.getPointerPath(connectionNode, 'dst');
-                    dstNode = nodes[dstPath];
-                    self.logger.info(self.core.getAttribute(dstNode, 'name'));
-                    //output += self.logger.info(self.core.getAttribute(childNode, 'name'));
-                    //self.logger.info(output);
-                    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
-                                var nam = self.core.getAttribute(connectionNode, 'name');
-                                var MVA = self.core.getAttribute(connectionNode, 'MVA');
-                                var R1 = self.core.getAttribute(connectionNode, 'R1');
-                                var X1 = self.core.getAttribute(connectionNode, 'X1');
-                                var phases = self.core.getAttribute(connectionNode, 'Phases');
-                                var basekv = self.core.getAttribute(connectionNode, 'basekv');
-                                output = 'New vsource.'
-                                    //+nam +'phases='+phases +'basekv='+basekv+'MVA='+MVA+'r1='+R1+'x1='+X1;
-                                self.logger.info(output);
-                            }
+                //var j,
+                //    connectionPaths, connectionNode, dstPath, dstNode;
+                //connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                //for (j = 0; j < connectionPaths.length; j += 1) {
+                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //    connectionNode = nodes[connectionPaths[j]];
+                //    dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                //    dstNode = nodes[dstPath];
+                //    self.logger.info(self.core.getAttribute(dstNode, 'name'));
+                //    //output += self.logger.info(self.core.getAttribute(childNode, 'name'));
+                //    //self.logger.info(output);
+                //    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
+                //                var nam = self.core.getAttribute(connectionNode, 'name');
+                //                var MVA = self.core.getAttribute(connectionNode, 'MVA');
+                //                var R1 = self.core.getAttribute(connectionNode, 'R1');
+                //                var X1 = self.core.getAttribute(connectionNode, 'X1');
+                //                var phases = self.core.getAttribute(connectionNode, 'Phases');
+                //                var basekv = self.core.getAttribute(connectionNode, 'basekv');
+                //                output = 'New vsource.'
+                //                    //+nam +'phases='+phases +'basekv='+basekv+'MVA='+MVA+'r1='+R1+'x1='+X1;
+                //                self.logger.info(output);
+                //            }
+                //    output = 'New vsource.'
+                //    self.logger.info(output);
+                //    }
+                //}
+                //for (i = 0; i < connectionPaths.length; i += 1) {
+                //    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
+                //        var nam = self.core.getAttribute(connectionNode, 'name');
+                //        var MVA = self.core.getAttribute(connectionNode, 'MVA');
+                //        var R1 = self.core.getAttribute(connectionNode, 'R1');
+                //        var X1 = self.core.getAttribute(connectionNode, 'X1');
+                //        var phases = self.core.getAttribute(connectionNode, 'Phases');
+                //        var basekv = self.core.getAttribute(connectionNode, 'basekv');
+                //        output = nam.concat('New vsource.',nam,'phases=',phases,'basekv=',basekv,'MVA=',MVA,'r1=',R1,'x1=',X1);
+                //        self.logger.info(output);
+                //    }
+                //}
 
-                }
-            }
-            //for (i = 0; i < connectionPaths.length; i += 1) {
-            //    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
-            //        var nam = self.core.getAttribute(connectionNode, 'name');
-            //        var MVA = self.core.getAttribute(connectionNode, 'MVA');
-            //        var R1 = self.core.getAttribute(connectionNode, 'R1');
-            //        var X1 = self.core.getAttribute(connectionNode, 'X1');
-            //        var phases = self.core.getAttribute(connectionNode, 'Phases');
-            //        var basekv = self.core.getAttribute(connectionNode, 'basekv');
-            //        output = nam.concat('New vsource.',nam,'phases=',phases,'basekv=',basekv,'MVA=',MVA,'r1=',R1,'x1=',X1);
-            //        self.logger.info(output);
-            //    }
-            //}
 
+                //var artifact = self.blobClient.createArtifact('PowerSystem');
+                //// Upload the files to server.
+                //artifact.addFile('output.txt', output, function (err) {
+                //    if (err) {
+                //        callback(err);
+                //        return
+                //    }
+                //    // Save the artifact (uploads meta data about the file(s) within in it).
+                //    artifact.save(function (err, hash) {
+                //        if (err) {
+                //            callback(err);
+                //            return
+                //        }
+                //
+                //        // Add a link to the artifact to the plugin-result.
+                //        self.result.addArtifact(hash);
+                //
+                //        self.result.setSuccess(true);
+                //        callback(null, self.result);
+                //    })
+                //});
 
-
-
-            //var artifact = self.blobClient.createArtifact('PowerSystem');
-            //// Upload the files to server.
-            //artifact.addFile('output.txt', output, function (err) {
-            //    if (err) {
-            //        callback(err);
-            //        return
-            //    }
-            //    // Save the artifact (uploads meta data about the file(s) within in it).
-            //    artifact.save(function (err, hash) {
-            //        if (err) {
-            //            callback(err);
-            //            return
-            //        }
-            //
-            //        // Add a link to the artifact to the plugin-result.
-            //        self.result.addArtifact(hash);
-            //
-            //        self.result.setSuccess(true);
-            //        callback(null, self.result);
-            //    })
-            //});
 
             self.result.setSuccess(true);
             callback(null, self.result);
