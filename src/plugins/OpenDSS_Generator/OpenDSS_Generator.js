@@ -94,7 +94,7 @@ define([
                 self.logger.info(nodePath);
             }
             var powersystem = {
-                source: [], lines: [], loads: []
+                sources: [], lines: [], loads: []
             };
             var childrenPaths = self.core.getChildrenPaths(self.activeNode);
             var j,
@@ -124,7 +124,7 @@ define([
                     var x1 = self.core.getAttribute(childNode, 'X1');
                     var phase = self.core.getAttribute(childNode, 'phases');
                     var basekv = self.core.getAttribute(childNode, 'basekv');
-                    powersystem.source.push({
+                    powersystem.sources.push({
                         name: sourcenam,
                         MVA: MVA,
                         R1: r1,
@@ -215,10 +215,10 @@ define([
                         var phases = self.core.getAttribute(childNode, 'phases');
                         var KW = self.core.getAttribute(childNode, 'Kw');
                         var KV = self.core.getAttribute(childNode, 'kv');
-                        self.logger.info(Loadname);
-                        self.logger.info(phases);
-                        self.logger.info(KW);
-                        self.logger.info(KV);
+                        //self.logger.info(Loadname);
+                        //self.logger.info(phases);
+                        //self.logger.info(KW);
+                        //self.logger.info(KV);
                         powersystem.loads.push({
                             name: Loadname,
                             KW: KW,
@@ -229,77 +229,22 @@ define([
                     }
                 }
 
-
-                //self.logger.info(self.core.getAttribute(childNode, 'name'));
-                //if (self.isMetaTypeOf(childNode, self.META.Source) === true) {
-                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'phases'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'MVA'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'R1'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'X1'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'basekv'));
-                //}
-                //if (self.isMetaTypeOf(childNode, self.META.TransmissionLine) === true) {
-                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'C0'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'C1'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'R0'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'R1'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'X1'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'X0'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'Length'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'units'));
-                //}
-                //if (self.isMetaTypeOf(childNode, self.META.Load) === true) {
-                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'phases'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'Kw'));
-                //    self.logger.info(self.core.getAttribute(childNode, 'kv'));
-                //}
-                //if (self.isMetaTypeOf(childNode, self.META.Bus) === true) {
-                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
-                //}
-
-                //var j,
-                //    connectionPaths, connectionNode, dstPath, dstNode;
-                //connectionPaths = self.core.getCollectionPaths(childNode, 'src');
-                //for (j = 0; j < connectionPaths.length; j += 1) {
-                //    self.logger.info(self.core.getAttribute(childNode, 'name'));
-                //    connectionNode = nodes[connectionPaths[j]];
-                //    dstPath = self.core.getPointerPath(connectionNode, 'dst');
-                //    dstNode = nodes[dstPath];
-                //    self.logger.info(self.core.getAttribute(dstNode, 'name'));
-                //    //output += self.logger.info(self.core.getAttribute(childNode, 'name'));
-                //    //self.logger.info(output);
-                //    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
-                //                var nam = self.core.getAttribute(connectionNode, 'name');
-                //                var MVA = self.core.getAttribute(connectionNode, 'MVA');
-                //                var R1 = self.core.getAttribute(connectionNode, 'R1');
-                //                var X1 = self.core.getAttribute(connectionNode, 'X1');
-                //                var phases = self.core.getAttribute(connectionNode, 'Phases');
-                //                var basekv = self.core.getAttribute(connectionNode, 'basekv');
-                //                output = 'New vsource.'
-                //                    //+nam +'phases='+phases +'basekv='+basekv+'MVA='+MVA+'r1='+R1+'x1='+X1;
-                //                self.logger.info(output);
-                //            }
-                //    output = 'New vsource.'
-                //    self.logger.info(output);
-                //    }
-                //}
-                //for (i = 0; i < connectionPaths.length; i += 1) {
-                //    if (self.isMetaTypeOf(connectionNode, self.META.Source) === true){
-                //        var nam = self.core.getAttribute(connectionNode, 'name');
-                //        var MVA = self.core.getAttribute(connectionNode, 'MVA');
-                //        var R1 = self.core.getAttribute(connectionNode, 'R1');
-                //        var X1 = self.core.getAttribute(connectionNode, 'X1');
-                //        var phases = self.core.getAttribute(connectionNode, 'Phases');
-                //        var basekv = self.core.getAttribute(connectionNode, 'basekv');
-                //        output = nam.concat('New vsource.',nam,'phases=',phases,'basekv=',basekv,'MVA=',MVA,'r1=',R1,'x1=',X1);
-                //        self.logger.info(output);
-                //    }
-                //}
-
-                var dssConfig = '//Build me up';
+                var dssConfig = '';
+            for (i =0; i < powersystem.sources.length; i += 1) {
+                dssConfig = 'New vsource.' + sourcenam + ' ' + 'bus1=' + connbus + ' ' + 'phases=' + phases + ' ' + 'basekv=' + basekv + ' ' + 'MVA=' + MVA + ' ' + 'r1=' + r1 + ' ' + 'x1=' + x1;
+                dssConfig += "\n";
+                //self.logger.info(dssConfig);
+            }
+            for (i = 0; i < powersystem.lines.length; i += 1) {
+                dssConfig += 'New Line.' + Linename + ' ' + 'bus1=' + sourcebus + ' ' + 'bus2=' + destinationbus + ' ' + 'R1=' + R1 + ' ' + 'R0=' + R0 + ' ' + 'X1=' + X1 + ' ' + 'X0=' + X0 + ' ' +
+                    'C1=' + C1 + ' ' + 'C0=' + C0 + ' ' + 'length=' + Length + ' ' + 'phases=' + phases + ' ' + 'units=' + Units;
+                dssConfig += "\n";
+            }
+            for (i = 0; i < powersystem.loads.length; i += 1) {
+                dssConfig += 'New Load.' + Loadname + ' ' + 'bus1=' + dbus + ' ' + 'phases=' + phases + ' ' + 'Kw=' + KW + ' ' + 'Kv=' + KV;
+                dssConfig += "\n";
+            }
+            self.logger.info(dssConfig);
                 var artifact = self.blobClient.createArtifact('PowerSystem');
                 // Upload the files to server.
                 artifact.addFiles({
