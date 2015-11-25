@@ -229,21 +229,29 @@ define([
                     }
                 }
 
-                var dssConfig = '';
+            var dssConfig = 'clear';
+            dssConfig += "\n" + 'New object=circuit.samplename' + "\n" + '//Define Sources' + "\n";
             for (i =0; i < powersystem.sources.length; i += 1) {
-                dssConfig = 'New vsource.' + sourcenam + ' ' + 'bus1=' + connbus + ' ' + 'phases=' + phases + ' ' + 'basekv=' + basekv + ' ' + 'MVA=' + MVA + ' ' + 'r1=' + r1 + ' ' + 'x1=' + x1;
+                dssConfig += 'New vsource.' + powersystem.sources[i].name + ' ' + 'bus1=' + powersystem.sources[i].conbus + ' ' + 'phases=' + powersystem.sources[i].phases + ' ' +
+                    'basekv=' + powersystem.sources[i].basekv + ' ' + 'MVA=' + powersystem.sources[i].MVA + ' ' + 'r1=' + powersystem.sources[i].R1 + ' ' + 'x1=' + powersystem.sources[i].X1;
                 dssConfig += "\n";
-                //self.logger.info(dssConfig);
+                    //self.logger.info(dssConfig);
             }
+            dssConfig += '//Define the lines' + "\n";
             for (i = 0; i < powersystem.lines.length; i += 1) {
-                dssConfig += 'New Line.' + Linename + ' ' + 'bus1=' + sourcebus + ' ' + 'bus2=' + destinationbus + ' ' + 'R1=' + R1 + ' ' + 'R0=' + R0 + ' ' + 'X1=' + X1 + ' ' + 'X0=' + X0 + ' ' +
-                    'C1=' + C1 + ' ' + 'C0=' + C0 + ' ' + 'length=' + Length + ' ' + 'phases=' + phases + ' ' + 'units=' + Units;
+                dssConfig += 'New Line.' + powersystem.lines[i].name + ' ' + 'bus1=' + powersystem.lines[i].srcbus + ' ' + 'bus2=' + powersystem.lines[i].dstbus + ' ' + 'R1=' +
+                    powersystem.lines[i].R1 + ' ' + 'R0=' + powersystem.lines[i].R0 + ' ' + 'X1=' + powersystem.lines[i].X1 + ' ' + 'X0=' + powersystem.lines[i].X0 + ' ' +
+                    'C1=' + powersystem.lines[i].C1 + ' ' + 'C0=' + powersystem.lines[i].C0 + ' ' + 'length=' + powersystem.lines[i].Length + ' ' + 'units=' + powersystem.lines[i].Units;
                 dssConfig += "\n";
             }
+            dssConfig += '//Define the loads' + "\n";
             for (i = 0; i < powersystem.loads.length; i += 1) {
-                dssConfig += 'New Load.' + Loadname + ' ' + 'bus1=' + dbus + ' ' + 'phases=' + phases + ' ' + 'Kw=' + KW + ' ' + 'Kv=' + KV;
+                dssConfig += 'New Load.' + powersystem.loads[i].name + ' ' + 'bus1=' + powersystem.loads[i].destbus + ' ' + 'phases=' + powersystem.loads[i].phases + ' ' + 'Kw=' +
+                    powersystem.loads[i].KW + ' ' + 'Kv=' + powersystem.loads[i].KV;
                 dssConfig += "\n";
             }
+            dssConfig += '//Define the voltagebases' + "\n" + 'set voltagebases=' + '[' + basekv + ']' + "\n" + 'calcv' + "\n" + 'set freq=60' + "\n" + 'set mode=snapshot' + "\n" + 'solve' + "\n" +
+                '//used for steady state analysis of power systems';
             self.logger.info(dssConfig);
                 var artifact = self.blobClient.createArtifact('PowerSystem');
                 // Upload the files to server.
