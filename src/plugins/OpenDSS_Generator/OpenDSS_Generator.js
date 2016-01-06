@@ -94,7 +94,7 @@ define([
                 self.logger.info(nodePath);
             }
             var powersystem = {
-                sources: [], lines: [], loads: []
+                sources: [], lines: [], loads: [], faults: []
             };
             var childrenPaths = self.core.getChildrenPaths(self.activeNode);
             var j,
@@ -211,20 +211,39 @@ define([
                         var dbus = sname;
                         //self.logger.info(sname);
                     }
-                        var Loadname = self.core.getAttribute(childNode, 'name');
-                        var phases = self.core.getAttribute(childNode, 'phases');
-                        var KW = self.core.getAttribute(childNode, 'Kw');
-                        var KV = self.core.getAttribute(childNode, 'kv');
-                        //self.logger.info(Loadname);
-                        //self.logger.info(phases);
-                        //self.logger.info(KW);
-                        //self.logger.info(KV);
-                        powersystem.loads.push({
-                            name: Loadname,
-                            KW: KW,
-                            KV: KV,
-                            phases: phases,
-                            destbus: dbus
+                    var Loadname = self.core.getAttribute(childNode, 'name');
+                    var phases = self.core.getAttribute(childNode, 'phases');
+                    var KW = self.core.getAttribute(childNode, 'Kw');
+                    var KV = self.core.getAttribute(childNode, 'kv');
+                    //self.logger.info(Loadname);
+                    //self.logger.info(phases);
+                    //self.logger.info(KW);
+                    //self.logger.info(KV);
+                    powersystem.loads.push({
+                        name: Loadname,
+                        KW: KW,
+                        KV: KV,
+                        phases: phases,
+                        destbus: dbus
+                    });
+                }
+                    if (self.isMetaTypeOf(childNode, self.META.Fault) === true) {
+                        var Fname = self.core.getAttribute(childNode, 'name');
+                        connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
+                        for (j = 0; j < connectionPaths.length; j += 1) {
+                            connectionNode = nodes[connectionPaths[j]];
+                            srcpath = self.core.getPointerPath(connectionNode, 'src');
+                            srcNode = nodes[srcpath];
+                            var faultsourcename = self.core.getAttribute(srcNode, 'name');
+                        }
+                        var Fname = self.core.getAttribute(childNode, 'name');
+                        var numofphases = self.core.getAttribute(childNode, 'phases');
+                        var R = self.core.getAttribute(childNode, 'R');
+                        powersystem.faults.push({
+                            name: Fname,
+                            phases: numofphases,
+                            sourcebuss: faultsourcename,
+                            R: R
                         });
                     }
                 }
@@ -248,6 +267,12 @@ define([
             for (i = 0; i < powersystem.loads.length; i += 1) {
                 dssConfig += 'New Load.' + powersystem.loads[i].name + ' ' + 'bus1=' + powersystem.loads[i].destbus + ' ' + 'phases=' + powersystem.loads[i].phases + ' ' + 'Kw=' +
                     powersystem.loads[i].KW + ' ' + 'Kv=' + powersystem.loads[i].KV;
+                dssConfig += "\n";
+            }
+            dssConfig += '//Define the faults' + "\n";
+            for (i = 0; i < powersystem.faults.length; i += 1) {
+                dssConfig += 'New fault.' + powersystem.faults[i].name + ' ' + 'bus1=' + powersystem.faults[i].sourcebuss + ' ' + 'phases=' + powersystem.faults[i].phases + ' ' + 'R=' +
+                    powersystem.faults[i].R;
                 dssConfig += "\n";
             }
             dssConfig += '//Define the voltagebases' + "\n" + 'set voltagebases=' + '[' + basekv + ']' + "\n" + 'calcv' + "\n" + 'set freq=60' + "\n" + 'set mode=snapshot' + "\n" + 'solve' + "\n" +
