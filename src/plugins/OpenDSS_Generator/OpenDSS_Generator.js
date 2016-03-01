@@ -20,6 +20,7 @@ define([
      * @classdesc This class represents the plugin OpenDSS_Generator.
      * @constructor
      */
+
     var OpenDSS_Generator = function () {
         // Call base class' constructor.
         PluginBase.call(this);

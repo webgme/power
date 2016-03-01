@@ -6,7 +6,11 @@
         "test": "test/plugins/OpenDSS_Generator"
       }
     },
-    "seeds": {},
+    "seeds": {
+      "Power": {
+        "src": "src/seeds/Power"
+      }
+    },
     "visualizers": {}
   },
   "dependencies": {
