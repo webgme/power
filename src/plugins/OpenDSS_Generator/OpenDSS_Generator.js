@@ -36,7 +36,7 @@ define([
      * @public
      */
     OpenDSS_Generator.prototype.getName = function () {
-        return 'New Plugin';
+        return 'OpenDSS Generator';
     };
 
     /**
@@ -66,9 +66,9 @@ define([
 
 
         // Using the logger.
-        self.logger.debug('This is a debug message.');
-        self.logger.info('This is an info message.');
-        self.logger.warn('This is a warning message.');
+        //self.logger.debug('This is a debug message.');
+        //self.logger.info('This is an info message.');
+        //self.logger.warn('This is a warning message.');
         //self.logger.error('This is an error message.');
 
         // Using the coreAPI to make changes.
