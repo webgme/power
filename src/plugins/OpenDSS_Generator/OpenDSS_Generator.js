@@ -7,11 +7,15 @@
 
 define([
     'plugin/PluginConfig',
-    'plugin/PluginBase'
+    'plugin/PluginBase',
+    'text!./metadata.json'
 ], function (
     PluginConfig,
-    PluginBase) {
+    PluginBase,
+    pluginMetadata) {
     'use strict';
+
+    pluginMetadata = JSON.parse(pluginMetadata);
 
     /**
      * Initializes a new instance of OpenDSS_Generator.
@@ -24,29 +28,14 @@ define([
     var OpenDSS_Generator = function () {
         // Call base class' constructor.
         PluginBase.call(this);
+        this.pluginMetadata = pluginMetadata;
     };
+
+    OpenDSS_Generator.metadata = pluginMetadata;
 
     // Prototypal inheritance from PluginBase.
     OpenDSS_Generator.prototype = Object.create(PluginBase.prototype);
     OpenDSS_Generator.prototype.constructor = OpenDSS_Generator;
-
-    /**
-     * Gets the name of the OpenDSS_Generator.
-     * @returns {string} The name of the plugin.
-     * @public
-     */
-    OpenDSS_Generator.prototype.getName = function () {
-        return 'OpenDSS Generator';
-    };
-
-    /**
-     * Gets the semantic version (semver.org) of the OpenDSS_Generator.
-     * @returns {string} The version of the plugin.
-     * @public
-     */
-    OpenDSS_Generator.prototype.getVersion = function () {
-        return '0.1.0';
-    };
 
     /**
      * Main function for the plugin to execute. This will perform the execution.
