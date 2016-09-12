@@ -1,0 +1,14 @@
+{
+  "id": "Matlab_Code_Generator",
+  "name": "Matlab_Code_Generator",
+  "version": "0.1.0",
+  "description": "",
+  "icon": {
+    "class": "glyphicon glyphicon-cog",
+    "src": ""
+  },
+  "disableServerSideExecution": false,
+  "disableBrowserSideExecution": false,
+  "writeAccessRequired": false,
+  "configStructure": []
+}
