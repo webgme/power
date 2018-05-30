@@ -60,7 +60,9 @@ define([
         //self.logger.warn('This is a warning message.');
         //self.logger.error('This is an error message.');
 
-        // Using the coreAPI to make changes.
+        /** Using the coreAPI to build desired method functions.
+        * If not a power system then return
+        */
 
         nodeObject = self.activeNode;
         if (self.core.getPath(self.activeNode) === ' ' || self.isMetaTypeOf(self.activeNode, self.META.PowerSystem) === false)
@@ -68,13 +70,17 @@ define([
             callback('ActiveNode is not a powersystem', self.result);
             return;
         }
-
+        
+        /** If it's a power system then start loading
+        */
         self.core.loadSubTree(self.activeNode, function (err, nodeList) {
             if (err) {
                 callback(err);
                 return;
             }
-
+            
+            /** Obtain the node paths
+            */
             var i,
                 nodePath,
                 nodes = {};
@@ -83,6 +89,9 @@ define([
                 nodes[nodePath] = nodeList[i];
                 //self.logger.info(nodePath);
             }
+            
+            /** Method variables initialization
+            */
             var powersystem = {
                 sources: [], lines: [], loads: [], transformers: [], faults: []
             };
@@ -93,25 +102,35 @@ define([
             var childrenPaths = self.core.getChildrenPaths(self.activeNode);
             var j,
                 connectionPaths, connectionNode,srcpath, srcNode, dstPath, dstNode;
+            
+            /** Loop through all childrens
+            */
             for (i=0; i < childrenPaths.length; i += 1) {
                 var childNode = nodes[childrenPaths[i]];
+                
+                /** Check if the Node Meta type is a Source
+                */
                 if (self.isMetaTypeOf(childNode, self.META.Source) === true) {
                     var nam = self.core.getAttribute(childNode, 'name');
                     var connbus;
-                    connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                    connectionPaths = self.core.getCollectionPaths(childNode, 'src'); // Obtain the connections between a node with all the other connecting nodes
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         //self.logger.info(self.core.getAttribute(childNode, 'name'));
-                        connectionNode = nodes[connectionPaths[j]];
-                        srcpath = self.core.getPointerPath(connectionNode, 'src');
-                        srcNode = nodes[srcpath];
-                        dstPath = self.core.getPointerPath(connectionNode, 'dst');
-                        dstNode = nodes[dstPath];
+                        connectionNode = nodes[connectionPaths[j]]; 
+                        srcpath = self.core.getPointerPath(connectionNode, 'src'); // Obtain source path 
+                        srcNode = nodes[srcpath]; // Obtain source node
+                        dstPath = self.core.getPointerPath(connectionNode, 'dst'); //Obtain destination path
+                        dstNode = nodes[dstPath]; //Obtain destination node
                         //self.logger.info(self.core.getAttribute(dstNode, 'name'));
-                        var dstname = self.core.getAttribute(dstNode, 'name');
-                        var relid = self.core.getRelid(dstNode);
+                        var dstname = self.core.getAttribute(dstNode, 'name'); // Obtain destination node name
+                        var relid = self.core.getRelid(dstNode); // Obtain destination node ID
                         connbus = dstname;
                         //buses.push('bus' + 1 + '=' + dstname);
                     }
+                    
+                    /** Gathering the information using coreAPI and storing it in the dictionary
+                    */
+                    
                     var sourcenam = self.core.getAttribute(childNode, 'name');
                     var MVA = self.core.getAttribute(childNode, 'MVA');
                     var x1r1 = self.core.getAttribute(childNode, 'X1R1');
@@ -128,10 +147,16 @@ define([
                         conbus: connbus
                     });
                 }
+                
+                /** Check if the Node Meta type is a Transmission Line
+                */
+                
                 if (self.isMetaTypeOf(childNode, self.META.TransmissionLine) === true) {
                     var Lname = self.core.getAttribute(childNode, 'name');
                     //self.logger.info(Lname);
                     connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                    /** Obtain the source and destination and their corresponding paths 
+                    */
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         //self.logger.info(self.core.getAttribute(childNode, 'name'));
                         connectionNode = nodes[connectionPaths[j]];
@@ -157,6 +182,9 @@ define([
                         var sourcebus = srcname;
                         //self.logger.info(srcname);
                     }
+                    
+                    /** Gather the related information and store it in the dictionary
+                    */
                     var Linename = self.core.getAttribute(childNode, 'name');
                     var C0 = self.core.getAttribute(childNode, 'C0');
                     var C1 = self.core.getAttribute(childNode, 'C1');
@@ -190,10 +218,16 @@ define([
                     });
                     comp_data_list.push(Linename);
                 }
+                
+                /** Check if the Node Meta type is a Transformer 
+                */
                  if (self.isMetaTypeOf(childNode, self.META.Transformer) === true){
                     var Tname = self.core.getAttribute(childNode, 'name');
                 	//self.logger.info(Tname);
                 	connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
+                    
+                     /** Obtain the source and destination and their corresponding paths 
+                    */
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         connectionNode = nodes[connectionPaths[j]];
                         srcpath = self.core.getPointerPath(connectionNode, 'src');                            
@@ -212,7 +246,10 @@ define([
                     	dstNode = nodes[dstPath];
                     	var Transformer_dstname = self.core.getAttribute(dstNode, 'name');
                     	//self.logger.info(Transformer_dstname);
-                    }                    	
+                    } 
+                     
+                    /** Gather the related information and store it in the dictionary
+                    */
                     var num_of_phases = self.core.getAttribute(childNode, 'phases');
                 	var conns = self.core.getAttribute(childNode, 'conns');
                 	var XHL = self.core.getAttribute(childNode, 'XHL');
@@ -228,9 +265,15 @@ define([
                     });                    	
                     //self.logger.info(num_of_phases);
                 }
-                if (self.isMetaTypeOf(childNode, self.META.load) === true) {
+                
+                /** Check if the Node Meta type is a Load 
+                */
+                if (self.isMetaTypeOf(childNode, self.META.Load) === true) {
                     var Ldname = self.core.getAttribute(childNode, 'name');
                     //self.logger.info(Ldname);
+                    
+                    /** Obtain the source and destination and their corresponding paths 
+                    */
                     connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         //self.logger.info(self.core.getAttribute(childNode, 'name'));
@@ -244,6 +287,9 @@ define([
                         var dbus = sname;
                         //self.logger.info(sname);
                     }
+                    
+                    /** Gather the related information and store it in the dictionary
+                    */
                     var Loadname = self.core.getAttribute(childNode, 'name');
                     var phases = self.core.getAttribute(childNode, 'phases');
                     var KW = self.core.getAttribute(childNode, 'Kw');
@@ -266,8 +312,14 @@ define([
                     	value: KW
                     });                   
                 }
+                
+                /** Check if the Node Meta type is a Fault 
+                */
                 if (self.isMetaTypeOf(childNode, self.META.Fault) === true) {
                     var Fname = self.core.getAttribute(childNode, 'name');
+                    
+                    /** Obtain the source and destination and their corresponding paths 
+                    */
                     connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         connectionNode = nodes[connectionPaths[j]];                            
@@ -275,6 +327,9 @@ define([
                         srcNode = nodes[srcpath];
                         var faultsourcename = self.core.getAttribute(srcNode, 'name');
                     }
+                    
+                    /** Gather the related information and store it in the dictionary
+                    */
                     var Fname = self.core.getAttribute(childNode, 'name');
                     var numofphases = self.core.getAttribute(childNode, 'phases');
                     var R = self.core.getAttribute(childNode, 'R');                        
@@ -288,6 +343,8 @@ define([
                
             }
 
+            /** Using the stored information from the dictionary to create the system model 
+            */
             var dssConfig = 'clear';
             var comp_data = new String();
             var Load_data = new String();
@@ -349,6 +406,9 @@ define([
             dssConfig += '//Define the voltagebases' + "\n" + 'set voltagebases=' + '[' + basekv + ']' + "\n" + 'calcv' + "\n" + 
             			 'set freq=60' + "\n" + 'set mode=snapshot' + "\n" + 'solve' + "\n" + 
             			 '//used for steady state analysis of power systems';
+            
+            /** Generating the artifacts
+            */
             self.logger.info(dssConfig);
                 var artifact = self.blobClient.createArtifact('PowerSystem');
                 // Upload the files to server.
