@@ -65,7 +65,9 @@ define([
         //self.logger.warn('This is a warning message.');
         //self.logger.error('This is an error message.');
 
-        // Using the coreAPI to make changes.
+        /** Using the coreAPI to build desired method functions.
+        * If not a power system then return
+        */
 
         nodeObject = self.activeNode;
         if (self.core.getPath(self.activeNode) === ' ' || self.isMetaTypeOf(self.activeNode, self.META.PowerSystem) === false)
@@ -73,6 +75,9 @@ define([
             callback('ActiveNode is not a powersystem', self.result);
             return;
         }
+	    
+	/** If it's a power system then start loading
+        */
         self.core.loadSubTree(self.activeNode, function (err, nodeList) {
             if (err) {
                 callback(err);
@@ -86,6 +91,9 @@ define([
             nodes[nodePath] = nodeList[i];
             //self.logger.info(nodePath);
         }
+		
+	/** Method variables initialization
+        */
         var powersystem = {
             sources: [], lines: [], loads: [], transformers: [], faults: [], buses: []
         };
@@ -101,26 +109,33 @@ define([
             	return; 
             }   
             
+	    /** Loop through all childrens
+            */
             for (i=0; i < childrenPaths.length; i += 1) {
                 var childNode = nodes[childrenPaths[i]];
+		/** Check if the Node Meta type is a Source
+                */
                 if (self.isMetaTypeOf(childNode, self.META.Source) === true) {
                     var nam = self.core.getAttribute(childNode, 'name');
                     var connbus;
-                    connectionPaths = self.core.getCollectionPaths(childNode, 'src');
-                    var source_position = self.core.getRegistry(childNode, 'position');
+                    connectionPaths = self.core.getCollectionPaths(childNode, 'src'); // Obtain the connections between a node with all the other connecting nodes
+                    var source_position = self.core.getRegistry(childNode, 'position'); //Obtain the position of the object in the WebGme Model
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         //self.logger.info(self.core.getAttribute(childNode, 'name'));
                         connectionNode = nodes[connectionPaths[j]];
-                        srcpath = self.core.getPointerPath(connectionNode, 'src');
+                        srcpath = self.core.getPointerPath(connectionNode, 'src'); // Obtain source path 
                         srcNode = nodes[srcpath];
-                        dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                        dstPath = self.core.getPointerPath(connectionNode, 'dst'); //Obtain destination path
                         dstNode = nodes[dstPath];
                         //self.logger.info(self.core.getAttribute(dstNode, 'name'));
-                        var dstname = self.core.getAttribute(dstNode, 'name');
-                        var relid = self.core.getRelid(dstNode);
+                        var dstname = self.core.getAttribute(dstNode, 'name'); // Obtain destination node name
+                        var relid = self.core.getRelid(dstNode); // Obtain destination node ID
                         connbus = dstname;
                         //buses.push('bus' + 1 + '=' + dstname);
                     }
+			
+		    /** Gathering the information using coreAPI and storing it in the dictionary
+                    */
                     var sourcenam = self.core.getAttribute(childNode, 'name');
                     var MVA = self.core.getAttribute(childNode, 'MVA');
                     var r1 = self.core.getAttribute(childNode, 'R1');
@@ -142,10 +157,16 @@ define([
                     });
                     //self.logger.info(source_position);
                 }
+		    
+		/** Check if the Node Meta type is a Transmission Line
+                */
                 if (self.isMetaTypeOf(childNode, self.META.TransmissionLine) === true) {
                     var Lname = self.core.getAttribute(childNode, 'name');
                     var TL_position = self.core.getRegistry(childNode, 'position');
                     //self.logger.info(Lname);
+	  	    
+		    /** Obtain the source and destination and their corresponding paths 
+                    */
                     connectionPaths = self.core.getCollectionPaths(childNode, 'src');
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         //self.logger.info(self.core.getAttribute(childNode, 'name'));
@@ -172,6 +193,9 @@ define([
                         var sourcebus = srcname;
                         //self.logger.info(srcname);
                     }
+		
+		    /** Gather the related information and store it in the dictionary
+                    */
                     var Linename = self.core.getAttribute(childNode, 'name');
                     var C0 = self.core.getAttribute(childNode, 'C0');
                     var C1 = self.core.getAttribute(childNode, 'C1');
@@ -206,11 +230,17 @@ define([
                         pos: TL_pos
                     });
                 }
+		    
+		 /** Check if the Node Meta type is a Transformer 
+                 */
                  if (self.isMetaTypeOf(childNode, self.META.Transformer) === true){
                     var Tname = self.core.getAttribute(childNode, 'name');
                 	//self.logger.info(Tname);
                 	connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
                 	var transformer_position = self.core.getRegistry(childNode, 'position');
+			 
+		    /** Obtain the source and destination and their corresponding paths 
+                    */
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         connectionNode = nodes[connectionPaths[j]];
                         srcpath = self.core.getPointerPath(connectionNode, 'src');                            
@@ -229,7 +259,10 @@ define([
                     	dstNode = nodes[dstPath];
                     	var Transformer_dstname = self.core.getAttribute(dstNode, 'name');
                     	//self.logger.info(Transformer_dstname);
-                    }                    	
+                    }   
+			 
+		    /** Gather the related information and store it in the dictionary
+                    */
                     var num_of_phases = self.core.getAttribute(childNode, 'phases');
                 	var conns = self.core.getAttribute(childNode, 'conns');
                 	var XHL = self.core.getAttribute(childNode, 'XHL');
@@ -257,11 +290,17 @@ define([
                     });                    	
                     //self.logger.info(transformer_position);
                 }
+		    
+		/** Check if the Node Meta type is a Load 
+                */
                 if (self.isMetaTypeOf(childNode, self.META.Load) === true) {
                     var Ldname = self.core.getAttribute(childNode, 'name');
                     var load_position = self.core.getRegistry(childNode, 'position');
                     //self.logger.info(Ldname);
                     connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
+		 
+		    /** Obtain the source and destination and their corresponding paths 
+                    */
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         //self.logger.info(self.core.getAttribute(childNode, 'name'));
                         connectionNode = nodes[connectionPaths[j]];
@@ -274,6 +313,9 @@ define([
                         var dbus = sname;
                         //self.logger.info(sname);
                     }
+			
+		    /** Gather the related information and store it in the dictionary
+                    */
                     var Loadname = self.core.getAttribute(childNode, 'name');
                     var phases = self.core.getAttribute(childNode, 'phases');
                     var KW = self.core.getAttribute(childNode, 'Kw');
@@ -294,16 +336,25 @@ define([
                         pos: load_pos
                     });                  
                 }
+		    
+		/** Check if the Node Meta type is a Fault 
+                */
                 if (self.isMetaTypeOf(childNode, self.META.Fault) === true) {
                     var Fname = self.core.getAttribute(childNode, 'name');
                     var fault_position = self.core.getRegistry(childNode, 'position');
                     connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
+			
+		    /** Obtain the source and destination and their corresponding paths 
+                    */
                     for (j = 0; j < connectionPaths.length; j += 1) {
                         connectionNode = nodes[connectionPaths[j]];                            
                         srcpath = self.core.getPointerPath(connectionNode, 'src');
                         srcNode = nodes[srcpath];
                         var faultsourcename = self.core.getAttribute(srcNode, 'name');
                     }
+			
+	            /** Gather the related information and store it in the dictionary
+                    */
                     var Fname = self.core.getAttribute(childNode, 'name');
                     var numofphases = self.core.getAttribute(childNode, 'phases');
                     var R = self.core.getAttribute(childNode, 'R'); 
@@ -326,7 +377,10 @@ define([
                     }); 
                 }
             }
-         //self.logger.info (powersystem.buses);   
+         //self.logger.info (powersystem.buses);  
+		
+	 /** Using the stored information from the dictionary to create the system model 
+         */
          var mConfig = 
          	'%Generated by Matlab_Code_Generator Plugin through WebGME\n';
          mConfig += '%Function to generate matlab model' + "\n" + '%Author: Saqib Hasan(saqib.hasan@vanderbilt.edu)' + "\n" + 
@@ -492,6 +546,9 @@ define([
          mConfig += "set_param([fname '/powergui'],'SimulationMode','Phasor')\n"; 
          mConfig += 'save_system(fname);' + "\n";
          //self.logger.info(mConfig);  
+		
+		/** Generating the artifacts
+                */
          	var artifact = self.blobClient.createArtifact('PowerSystem_Matlab');
                 // Upload the files to server.
                 artifact.addFiles({
@@ -543,6 +600,8 @@ define([
 
     };
     
+    /** Constraint check
+    */
     Matlab_Code_Generator.prototype.checkViolations = function (nodes, childrenPaths) {
     	var self = this,
     		result, object_names = {},i;
