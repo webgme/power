@@ -4,6 +4,10 @@
       "OpenDSS_Generator": {
         "src": "src/plugins/OpenDSS_Generator",
         "test": "test/plugins/OpenDSS_Generator"
+      },
+      "Matlab_Code_Generator": {
+        "src": "src/plugins/Matlab_Code_Generator",
+        "test": "test/plugins/Matlab_Code_Generator"
       }
     },
     "seeds": {

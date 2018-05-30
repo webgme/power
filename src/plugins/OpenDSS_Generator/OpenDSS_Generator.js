@@ -81,11 +81,15 @@ define([
             for (i = 0; i < nodeList.length; i += 1) {
                 nodePath = self.core.getPath(nodeList[i]);
                 nodes[nodePath] = nodeList[i];
-                self.logger.info(nodePath);
+                //self.logger.info(nodePath);
             }
             var powersystem = {
-                sources: [], lines: [], loads: [], faults: []
+                sources: [], lines: [], loads: [], transformers: [], faults: []
             };
+            var Load_data_list = {
+                key: [], value: []
+            };
+            var comp_data_list = [];
             var childrenPaths = self.core.getChildrenPaths(self.activeNode);
             var j,
                 connectionPaths, connectionNode,srcpath, srcNode, dstPath, dstNode;
@@ -110,15 +114,15 @@ define([
                     }
                     var sourcenam = self.core.getAttribute(childNode, 'name');
                     var MVA = self.core.getAttribute(childNode, 'MVA');
-                    var r1 = self.core.getAttribute(childNode, 'R1');
-                    var x1 = self.core.getAttribute(childNode, 'X1');
+                    var x1r1 = self.core.getAttribute(childNode, 'X1R1');
+                    //var x1 = self.core.getAttribute(childNode, 'X1');
                     var phase = self.core.getAttribute(childNode, 'phases');
                     var basekv = self.core.getAttribute(childNode, 'basekv');
                     powersystem.sources.push({
                         name: sourcenam,
                         MVA: MVA,
-                        R1: r1,
-                        X1: x1,
+                        X1R1: x1r1,
+                        //X1: x1,
                         phases: phase,
                         basekv: basekv,
                         conbus: connbus
@@ -184,8 +188,47 @@ define([
                         srcbus: sourcebus,
                         dstbus: destinationbus
                     });
+                    comp_data_list.push(Linename);
                 }
-                if (self.isMetaTypeOf(childNode, self.META.Load) === true) {
+                 if (self.isMetaTypeOf(childNode, self.META.Transformer) === true){
+                    var Tname = self.core.getAttribute(childNode, 'name');
+                	//self.logger.info(Tname);
+                	connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
+                    for (j = 0; j < connectionPaths.length; j += 1) {
+                        connectionNode = nodes[connectionPaths[j]];
+                        srcpath = self.core.getPointerPath(connectionNode, 'src');                            
+                        srcNode = nodes[srcpath];
+                        dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                    	dstNode = nodes[dstPath];
+                        var Transformer_sourcename = self.core.getAttribute(srcNode, 'name');
+                        //self.logger.info(Transformer_sourcename);
+                    }
+                   	connectionPaths = self.core.getCollectionPaths(childNode, 'src');
+                    for (j = 0; j < connectionPaths.length; j += 1) {                            
+                    	connectionNode = nodes[connectionPaths[j]];
+                        srcpath = self.core.getPointerPath(connectionNode, 'src');
+                        srcNode = nodes[srcpath];
+                        dstPath = self.core.getPointerPath(connectionNode, 'dst');
+                    	dstNode = nodes[dstPath];
+                    	var Transformer_dstname = self.core.getAttribute(dstNode, 'name');
+                    	//self.logger.info(Transformer_dstname);
+                    }                    	
+                    var num_of_phases = self.core.getAttribute(childNode, 'phases');
+                	var conns = self.core.getAttribute(childNode, 'conns');
+                	var XHL = self.core.getAttribute(childNode, 'XHL');
+                	var kvs = self.core.getAttribute(childNode, 'kvs');
+                	powersystem.transformers.push({
+                        name: Tname,                            
+                        phases: num_of_phases,
+                        source_bus: Transformer_sourcename,
+                        Dest_name: Transformer_dstname,
+                        XHL: XHL,
+                        conns: conns,
+                        kvs: kvs
+                    });                    	
+                    //self.logger.info(num_of_phases);
+                }
+                if (self.isMetaTypeOf(childNode, self.META.load) === true) {
                     var Ldname = self.core.getAttribute(childNode, 'name');
                     //self.logger.info(Ldname);
                     connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
@@ -205,6 +248,7 @@ define([
                     var phases = self.core.getAttribute(childNode, 'phases');
                     var KW = self.core.getAttribute(childNode, 'Kw');
                     var KV = self.core.getAttribute(childNode, 'kv');
+                    var kvar = self.core.getAttribute(childNode, 'kvar');
                     //self.logger.info(Loadname);
                     //self.logger.info(phases);
                     //self.logger.info(KW);
@@ -213,66 +257,109 @@ define([
                         name: Loadname,
                         KW: KW,
                         KV: KV,
+                        kvar: kvar,
                         phases: phases,
                         destbus: dbus
                     });
+                    Load_data_list.key.push({
+                    	key: Loadname,
+                    	value: KW
+                    });                   
                 }
-                    if (self.isMetaTypeOf(childNode, self.META.Fault) === true) {
-                        var Fname = self.core.getAttribute(childNode, 'name');
-                        connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
-                        for (j = 0; j < connectionPaths.length; j += 1) {
-                            connectionNode = nodes[connectionPaths[j]];
-                            srcpath = self.core.getPointerPath(connectionNode, 'src');
-                            srcNode = nodes[srcpath];
-                            var faultsourcename = self.core.getAttribute(srcNode, 'name');
-                        }
-                        var Fname = self.core.getAttribute(childNode, 'name');
-                        var numofphases = self.core.getAttribute(childNode, 'phases');
-                        var R = self.core.getAttribute(childNode, 'R');
-                        powersystem.faults.push({
-                            name: Fname,
-                            phases: numofphases,
-                            sourcebuss: faultsourcename,
-                            R: R
-                        });
+                if (self.isMetaTypeOf(childNode, self.META.Fault) === true) {
+                    var Fname = self.core.getAttribute(childNode, 'name');
+                    connectionPaths = self.core.getCollectionPaths(childNode, 'dst');
+                    for (j = 0; j < connectionPaths.length; j += 1) {
+                        connectionNode = nodes[connectionPaths[j]];                            
+                        srcpath = self.core.getPointerPath(connectionNode, 'src');
+                        srcNode = nodes[srcpath];
+                        var faultsourcename = self.core.getAttribute(srcNode, 'name');
                     }
+                    var Fname = self.core.getAttribute(childNode, 'name');
+                    var numofphases = self.core.getAttribute(childNode, 'phases');
+                    var R = self.core.getAttribute(childNode, 'R');                        
+                    powersystem.faults.push({
+                        name: Fname,
+                        phases: numofphases,
+                        sourcebuss: faultsourcename,
+                        R: R
+                    }); 
                 }
+               
+            }
 
             var dssConfig = 'clear';
+            var comp_data = new String();
+            var Load_data = new String();
             dssConfig += "\n" + 'New object=circuit.samplename' + "\n" + '//Define Sources' + "\n";
             for (i =0; i < powersystem.sources.length; i += 1) {
-                dssConfig += 'New vsource.' + powersystem.sources[i].name + ' ' + 'bus1=' + powersystem.sources[i].conbus + ' ' + 'phases=' + powersystem.sources[i].phases + ' ' +
-                    'basekv=' + powersystem.sources[i].basekv + ' ' + 'MVA=' + powersystem.sources[i].MVA + ' ' + 'r1=' + powersystem.sources[i].R1 + ' ' + 'x1=' + powersystem.sources[i].X1;
+                dssConfig += 'New vsource.' + powersystem.sources[i].name + ' ' + 'bus1=' + powersystem.sources[i].conbus + 
+                			 ' ' + 'phases=' + powersystem.sources[i].phases + ' ' + 'basekv=' + powersystem.sources[i].basekv + 
+                			 ' ' + 'Mvasc3=' + powersystem.sources[i].MVA + ' ' + 'x1r1=' + powersystem.sources[i].X1R1 + ' ' + 
+                			 'x0r0=' + powersystem.sources[i].X1R1;
                 dssConfig += "\n";
                     //self.logger.info(dssConfig);
             }
             dssConfig += '//Define the lines' + "\n";
+            comp_data += '[';
             for (i = 0; i < powersystem.lines.length; i += 1) {
-                dssConfig += 'New Line.' + powersystem.lines[i].name + ' ' + 'bus1=' + powersystem.lines[i].srcbus + ' ' + 'bus2=' + powersystem.lines[i].dstbus + ' ' + 'R1=' +
-                    powersystem.lines[i].R1 + ' ' + 'R0=' + powersystem.lines[i].R0 + ' ' + 'X1=' + powersystem.lines[i].X1 + ' ' + 'X0=' + powersystem.lines[i].X0 + ' ' +
-                    'C1=' + powersystem.lines[i].C1 + ' ' + 'C0=' + powersystem.lines[i].C0 + ' ' + 'length=' + powersystem.lines[i].Length + ' ' + 'units=' + powersystem.lines[i].Units;
+                dssConfig += 'New Line.' + powersystem.lines[i].name + ' ' + 'bus1=' + powersystem.lines[i].srcbus + ' ' + 
+                			 'bus2=' + powersystem.lines[i].dstbus + ' ' + 'R1=' + powersystem.lines[i].R1 + ' ' + 'R0=' + 
+                			 powersystem.lines[i].R0 + ' ' + 'X1=' + powersystem.lines[i].X1 + ' ' + 'X0=' + 
+                			 powersystem.lines[i].X0 + ' ' + 'C1=' + powersystem.lines[i].C1 + ' ' + 'C0=' + 
+                			 powersystem.lines[i].C0 + ' ' + 'length=' + powersystem.lines[i].Length + ' ' + 'units=' + 
+                			 powersystem.lines[i].Units;
+                dssConfig += "\n";
+                comp_data += "'" + 'Line.' + powersystem.lines[i].name + "'";
+                if (i != (powersystem.lines.length-1)){
+                	comp_data += ",";
+                }
+            }
+            comp_data += ']';
+            dssConfig += '//Define the transformers' + "\n";
+            for (i = 0; i < powersystem.transformers.length; i += 1) {
+                dssConfig += 'New Transformer.' + powersystem.transformers[i].name + ' ' + 'phases=' + 
+                			 powersystem.transformers[i].phases + ' ' + 'buses=' + '(' + powersystem.transformers[i].source_bus + 
+                			 ' ' + powersystem.transformers[i].Dest_name + ')' + ' ' + 'conns=' + "'" + 
+                			 powersystem.transformers[i].conns + "'" + ' ' + 'kvs=' + '"' + powersystem.transformers[i].kvs + 
+                			 '"' + ' ' + 'XHL=' + powersystem.transformers[i].XHL;
                 dssConfig += "\n";
             }
             dssConfig += '//Define the loads' + "\n";
+            Load_data += '{';
             for (i = 0; i < powersystem.loads.length; i += 1) {
-                dssConfig += 'New Load.' + powersystem.loads[i].name + ' ' + 'bus1=' + powersystem.loads[i].destbus + ' ' + 'phases=' + powersystem.loads[i].phases + ' ' + 'Kw=' +
-                    powersystem.loads[i].KW + ' ' + 'Kv=' + powersystem.loads[i].KV;
+                dssConfig += 'New Load.' + powersystem.loads[i].name + ' ' + 'bus1=' + powersystem.loads[i].destbus + ' ' + 
+                			 'phases=' + powersystem.loads[i].phases + ' ' + 'kVA=' + powersystem.loads[i].KW + "," + 
+                			 powersystem.loads[i].kvar + ' ' + 'Kv=' + powersystem.loads[i].KV + ' ' + 'conn=delta' + ' ' + 
+                			 'model=1';
                 dssConfig += "\n";
+                Load_data += "'" + 'Load.' + powersystem.loads[i].name +  "'" + ': ' + "(" + powersystem.loads[i].KW + "," +
+                			 powersystem.loads[i].kvar + ")";
+                if (i != (powersystem.loads.length-1)){
+                	Load_data += ",";
+                }
             }
+            Load_data += "}";
             dssConfig += '//Define the faults' + "\n";
             for (i = 0; i < powersystem.faults.length; i += 1) {
-                dssConfig += 'New fault.' + powersystem.faults[i].name + ' ' + 'bus1=' + powersystem.faults[i].sourcebuss + ' ' + 'phases=' + powersystem.faults[i].phases + ' ' + 'R=' +
-                    powersystem.faults[i].R;
+                dssConfig += 'New fault.' + powersystem.faults[i].name + ' ' + 'bus1=' + powersystem.faults[i].sourcebuss + ' ' + 
+                			 'phases=' + powersystem.faults[i].phases + ' ' + 'R=' + powersystem.faults[i].R;
                 dssConfig += "\n";
             }
-            dssConfig += '//Define the voltagebases' + "\n" + 'set voltagebases=' + '[' + basekv + ']' + "\n" + 'calcv' + "\n" + 'set freq=60' + "\n" + 'set mode=snapshot' + "\n" + 'solve' + "\n" +
-                '//used for steady state analysis of power systems';
+            dssConfig += '//Define the voltagebases' + "\n" + 'set voltagebases=' + '[' + basekv + ']' + "\n" + 'calcv' + "\n" + 
+            			 'set freq=60' + "\n" + 'set mode=snapshot' + "\n" + 'solve' + "\n" + 
+            			 '//used for steady state analysis of power systems';
             self.logger.info(dssConfig);
                 var artifact = self.blobClient.createArtifact('PowerSystem');
                 // Upload the files to server.
                 artifact.addFiles({
-                    'output.json': JSON.stringify(powersystem,null,4),
-                    'input.txt': dssConfig
+                    'output.json': JSON.stringify(powersystem,null,5),
+                    'input.txt': dssConfig,
+                    'open_dss_input_file.dss': dssConfig,
+                    'component_data.txt': comp_data,
+                    'component_data.json': JSON.stringify(comp_data_list, null, 4),
+                    'Load_data.txt': Load_data,
+                    'Load_data.json': JSON.stringify(Load_data_list, null, 2)
                 }, function (err) {
                     if (err) {
                         callback(err);
